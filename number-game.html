@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Number Guessing Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .info {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .info p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .remaining {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 18px;
+        }
+
+        .guesses {
+            margin-bottom: 20px;
+            min-height: 200px;
+        }
+
+        .guess-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            justify-content: center;
+        }
+
+        .digit-box {
+            width: 60px;
+            height: 60px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .digit-box.correct {
+            background-color: #6aaa64;
+            color: white;
+            border-color: #6aaa64;
+        }
+
+        .digit-box.present {
+            background-color: #ff9800;
+            color: white;
+            border-color: #ff9800;
+        }
+
+        .digit-box.absent {
+            background-color: #787c7e;
+            color: white;
+            border-color: #787c7e;
+        }
+
+        .input-section {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        #guessInput {
+            flex: 1;
+            padding: 15px;
+            font-size: 18px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            text-align: center;
+            letter-spacing: 8px;
+        }
+
+        #guessInput:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #submitBtn {
+            background-color: #667eea;
+            color: white;
+        }
+
+        #submitBtn:hover:not(:disabled) {
+            background-color: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        #submitBtn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        #newGameBtn {
+            width: 100%;
+            background-color: #6aaa64;
+            color: white;
+            display: none;
+        }
+
+        #newGameBtn:hover {
+            background-color: #5a9054;
+            transform: translateY(-2px);
+        }
+
+        .message {
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            display: none;
+        }
+
+        .message.win {
+            background-color: #d4edda;
+            color: #155724;
+            display: block;
+        }
+
+        .message.lose {
+            background-color: #f8d7da;
+            color: #721c24;
+            display: block;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+            font-size: 12px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .legend-box {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Number Guessing Game</h1>
+        <p class="subtitle">Guess the 4-digit number!</p>
+
+        <div class="info">
+            <p>Guesses Left: <span class="remaining" id="remaining">5</span></p>
+        </div>
+
+        <div id="message" class="message"></div>
+
+        <div class="guesses" id="guesses"></div>
+
+        <div class="input-section">
+            <input 
+                type="text" 
+                id="guessInput" 
+                maxlength="4" 
+                placeholder="1234"
+                autocomplete="off"
+            >
+            <button id="submitBtn">Guess</button>
+        </div>
+
+        <button id="newGameBtn">🎮 New Game</button>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-box" style="background-color: #6aaa64;"></div>
+                <span>Correct</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box" style="background-color: #ff9800;"></div>
+                <span>Wrong Position</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box" style="background-color: #787c7e;"></div>
+                <span>Not in Number</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let targetNumber = '';
+        let guessesLeft = 5;
+        let gameOver = false;
+
+        function generateRandomNumber() {
+            const first = Math.floor(Math.random() * 9) + 1;
+            const second = Math.floor(Math.random() * 10);
+            const third = Math.floor(Math.random() * 10);
+            const fourth = Math.floor(Math.random() * 10);
+            return '' + first + second + third + fourth;
+        }
+
+        function startNewGame() {
+            targetNumber = generateRandomNumber();
+            guessesLeft = 5;
+            gameOver = false;
+            document.getElementById('guesses').innerHTML = '';
+            document.getElementById('remaining').textContent = guessesLeft;
+            document.getElementById('guessInput').value = '';
+            document.getElementById('guessInput').disabled = false;
+            document.getElementById('submitBtn').disabled = false;
+            document.getElementById('newGameBtn').style.display = 'none';
+            document.getElementById('message').className = 'message';
+            document.getElementById('message').style.display = 'none';
+            console.log('Secret number:', targetNumber);
+        }
+
+        function checkGuess(guess) {
+            const result = [];
+            const targetArray = targetNumber.split('');
+            const guessArray = guess.split('');
+            const used = new Array(4).fill(false);
+            const checked = new Array(4).fill(false);
+
+            for (let i = 0; i < 4; i++) {
+                if (guessArray[i] === targetArray[i]) {
+                    result[i] = 'correct';
+                    used[i] = true;
+                    checked[i] = true;
+                }
+            }
+
+            for (let i = 0; i < 4; i++) {
+                if (!checked[i]) {
+                    let found = false;
+                    for (let j = 0; j < 4; j++) {
+                        if (!used[j] && guessArray[i] === targetArray[j]) {
+                            result[i] = 'present';
+                            used[j] = true;
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        result[i] = 'absent';
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        function displayGuess(guess, result) {
+            const guessesDiv = document.getElementById('guesses');
+            const row = document.createElement('div');
+            row.className = 'guess-row';
+
+            for (let i = 0; i < 4; i++) {
+                const box = document.createElement('div');
+                box.className = 'digit-box ' + result[i];
+                box.textContent = guess[i];
+                row.appendChild(box);
+            }
+
+            guessesDiv.appendChild(row);
+        }
+
+        function makeGuess() {
+            if (gameOver) return;
+
+            const input = document.getElementById('guessInput');
+            const guess = input.value;
+
+            if (guess.length !== 4) {
+                alert('Please enter a 4-digit number!');
+                return;
+            }
+
+            if (!/^\d+$/.test(guess)) {
+                alert('Please enter only digits!');
+                return;
+            }
+
+            const result = checkGuess(guess);
+            displayGuess(guess, result);
+
+            guessesLeft--;
+            document.getElementById('remaining').textContent = guessesLeft;
+
+            if (guess === targetNumber) {
+                gameOver = true;
+                document.getElementById('message').textContent = '🎉 Congratulations! You guessed it right!';
+                document.getElementById('message').className = 'message win';
+                document.getElementById('guessInput').disabled = true;
+                document.getElementById('submitBtn').disabled = true;
+                document.getElementById('newGameBtn').style.display = 'block';
+            } else if (guessesLeft === 0) {
+                gameOver = true;
+                document.getElementById('message').textContent = '😔 Game Over! The correct number was: ' + targetNumber;
+                document.getElementById('message').className = 'message lose';
+                document.getElementById('guessInput').disabled = true;
+                document.getElementById('submitBtn').disabled = true;
+                document.getElementById('newGameBtn').style.display = 'block';
+            }
+
+            input.value = '';
+            input.focus();
+        }
+
+        document.getElementById('submitBtn').addEventListener('click', makeGuess);
+
+        document.getElementById('guessInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                makeGuess();
+            }
+        });
+
+        document.getElementById('guessInput').addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+
+        document.getElementById('newGameBtn').addEventListener('click', startNewGame);
+
+        startNewGame();
+    </script>
+</body>
+</html>
